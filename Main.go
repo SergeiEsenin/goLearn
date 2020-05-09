@@ -30,33 +30,23 @@ func main() {
 	fmt.Println(now)
 	var holidays []Holiday
 	resp, err := http.Get("https://date.nager.at/api/v2/PublicHolidays/2017/UA")
-	if err != nil {
-		log.Println("Connection failed with ", err)
-		os.Exit(1)
-	}
-
+	handleError(err)
 	defer resp.Body.Close()
 
 	all, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Failed to copy req resp with ", err)
-		os.Exit(1)
-	}
+	handleError(err)
+
 	err = json.Unmarshal(all, &holidays)
-	if err != nil {
-		log.Println("Failed to unmarshall response ", err)
-		os.Exit(1)
+	handleError(err)
+	for i := 0; i < len(holidays); i++ {
+		holidays[i].calcDayOfYear()
 	}
 	log.Println(holidays)
-	//log.Println(string(all))
-	const layoutISO = "2006-01-02"
-	date := "2020-05-09"
-	t, err := time.Parse(layoutISO, date)
-	log.Println(t.Weekday().String())
-	handleError(err)
-	log.Println(t.YearDay())
 }
+
 func (h *Holiday) calcDayOfYear() {
 	const layoutISO = "2006-01-02"
-
+	num, err := time.Parse(layoutISO, h.Date)
+	handleError(err)
+	h.DayOfYear = num.YearDay()
 }
