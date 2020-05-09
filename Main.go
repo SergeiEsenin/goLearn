@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,10 +25,9 @@ func handleError(err error) {
 	}
 }
 func main() {
-	now := time.Now()
-	fmt.Println(now)
+	now := time.Now().YearDay()
 	var holidays []Holiday
-	resp, err := http.Get("https://date.nager.at/api/v2/PublicHolidays/2017/UA")
+	resp, err := http.Get("https://date.nager.at/api/v2/PublicHolidays/2020/UA")
 	handleError(err)
 	defer resp.Body.Close()
 
@@ -38,10 +36,26 @@ func main() {
 
 	err = json.Unmarshal(all, &holidays)
 	handleError(err)
+	var holiday Holiday
+	var next bool
 	for i := 0; i < len(holidays); i++ {
 		holidays[i].calcDayOfYear()
+		if now == holidays[i].DayOfYear {
+			holiday = holidays[i]
+			break
+		} else if now < holiday.DayOfYear {
+			holiday = holidays[i]
+			next = true
+			break
+		}
 	}
-	log.Println(holidays)
+	if next {
+		log.Println("Today no holiday next near holiday", holiday)
+		os.Exit(0)
+	}
+
+	log.Println("Today", holiday.LocalName)
+	os.Exit(0)
 }
 
 func (h *Holiday) calcDayOfYear() {
