@@ -1,13 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
+
+const layoutISO = "2006-01-02"
 
 type Holiday struct {
 	Date      string
@@ -49,18 +54,55 @@ func main() {
 			break
 		}
 	}
+
+	printResult(next, holiday)
+	fmt.Scanf("h")
+}
+func printResult(next bool, holiday Holiday) {
+	var b bytes.Buffer
+	b.WriteString("Today ")
 	if next {
-		log.Println("Today no holiday next near holiday", holiday)
-		os.Exit(0)
+		b.WriteString("no holiday next near holiday ")
 	}
 
-	log.Println("Today", holiday.LocalName)
-	os.Exit(0)
+	date, err := time.Parse(layoutISO, holiday.Date)
+	handleError(err)
+	b.WriteString(holiday.Name)
+	b.WriteString(" ")
+	b.WriteString(date.Month().String())
+	b.WriteString(" ")
+	b.WriteString(strconv.Itoa(date.Day()))
+	var range1 time.Time
+	var range2 time.Time
+	switch date.Weekday() {
+	case time.Friday:
+		range1 = date
+		range2 = date.Add(24 * 2 * time.Hour)
+	case time.Saturday:
+		range1 = date
+		range2 = date.Add(24 * 2 * time.Hour)
+	case time.Sunday:
+		range1 = date.Add(-24 * time.Hour)
+		range2 = date.Add(24 * 2 * time.Hour)
+	case time.Monday:
+		range1 = date.Add(-24 * 3 * time.Hour)
+		range2 = date
+	}
+	if &range1 != nil && &range2 != nil {
+		b.WriteString(" holidays will last 3 days: ")
+		b.WriteString(range1.Month().String())
+		b.WriteString(" ")
+		b.WriteString(strconv.Itoa(range1.Day()))
+		b.WriteString(" - ")
+		b.WriteString(range2.Month().String())
+		b.WriteString(" ")
+		b.WriteString(strconv.Itoa(range2.Day()))
+	}
+	log.Println(b.String())
 }
 
 func (h *Holiday) calcDayOfYear() {
-	const layoutISO = "2006-01-02"
-	num, err := time.Parse(layoutISO, h.Date)
+	date, err := time.Parse(layoutISO, h.Date)
 	handleError(err)
-	h.DayOfYear = num.YearDay()
+	h.DayOfYear = date.YearDay()
 }
