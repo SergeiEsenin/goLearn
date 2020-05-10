@@ -83,9 +83,9 @@ func printResult(next bool, holiday Holiday) {
 		range2 = date.Add(24 * 2 * time.Hour)
 	case time.Sunday:
 		range1 = date.Add(-24 * time.Hour)
-		range2 = date.Add(24 * 2 * time.Hour)
+		range2 = date.Add(24 * time.Hour)
 	case time.Monday:
-		range1 = date.Add(-24 * 3 * time.Hour)
+		range1 = date.Add(-24 * 2 * time.Hour)
 		range2 = date
 	}
 	if &range1 != nil && &range2 != nil {
