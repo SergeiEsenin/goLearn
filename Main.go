@@ -48,7 +48,7 @@ func main() {
 		if now == holidays[i].DayOfYear {
 			holiday = holidays[i]
 			break
-		} else if now < holiday.DayOfYear {
+		} else if now < holidays[i].DayOfYear {
 			holiday = holidays[i]
 			next = true
 			break
