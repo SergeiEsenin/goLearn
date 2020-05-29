@@ -30,9 +30,11 @@ func handleError(err error) {
 	}
 }
 func main() {
+	year := time.Now().Year()
+
 	now := time.Now().YearDay()
 	var holidays []Holiday
-	resp, err := http.Get("https://date.nager.at/api/v2/PublicHolidays/2020/UA")
+	resp, err := http.Get("https://date.nager.at/api/v2/PublicHolidays/" + strconv.Itoa(year) + "/UA")
 	handleError(err)
 	defer resp.Body.Close()
 
